@@ -5,9 +5,11 @@ from sklearn.preprocessing import LabelEncoder
 import matplotlib.pyplot as plt
 
 data = pd.read_csv('Data.csv')
+X = []
+Y = []
 
+#process and clean data. Lable columns and classes. 
 def cleanData(data):
-
 
     indexEmp = data[(data["employment_type"] != "FT")].index
     data.drop(indexEmp, inplace=True)
@@ -25,11 +27,13 @@ def cleanData(data):
     #cutData = cutData.iloc[:,:].values
 
     #fit encoded variables to specific columns
-    cutData.iloc[:, 0] = year.fit_transform(cutData[:,0])
-    cutData.iloc[:, 1] = exp_lvl.fit_transform(cutData[:, 1])
-    cutData.iloc[:, 2] = job_title.fit_transform(cutData[:, 2])
-    cutData.iloc[:, 4] = country.fit_transform(cutData[:, 4])
-    cutData.iloc[:, 5] = comp_size.fit_transform(cutData[:, 5])
+    cutData.iloc[:, 0] = year.fit_transform(cutData.iloc[:,0])
+    cutData.iloc[:, 1] = exp_lvl.fit_transform(cutData.iloc[:, 1])
+    cutData.iloc[:, 2] = job_title.fit_transform(cutData.iloc[:, 2])
+    cutData.iloc[:, 4] = country.fit_transform(cutData.iloc[:, 4])
+    cutData.iloc[:, 5] = comp_size.fit_transform(cutData.iloc[:, 5])
+    #year = 0, experiance level = 1, job title = 2, country = 4, company size = 5
+    #salary = 3
 
     loList = []
     mlList = []
@@ -37,14 +41,19 @@ def cleanData(data):
     mhList = []
     hiList= []
     for i in range(len(data)):
-        if(cutData[i, 3] == 0): loList.append(data.iloc[i, 3])
-        elif(cutData[i, 3] == 1): mlList.append(data.iloc[i, 3])
-        elif(cutData[i, 3] == 2): miList.append(data.iloc[i, 3])
-        elif(cutData[i, 3] == 3): mhList.append(data.iloc[i, 3])
-        elif(cutData[i, 3] == 4): hiList.append(data.iloc[i, 3])
+        if(cutData.iloc[i, 3] == 0): loList.append(data.iloc[i, 3])
+        elif(cutData.iloc[i, 3] == 1): mlList.append(data.iloc[i, 3])
+        elif(cutData.iloc[i, 3] == 2): miList.append(data.iloc[i, 3])
+        elif(cutData.iloc[i, 3] == 3): mhList.append(data.iloc[i, 3])
+        elif(cutData.iloc[i, 3] == 4): hiList.append(data.iloc[i, 3])
 
-    print(cutData)
-    return cutData
+    X = cutData.iloc[:, 3]
+    Y = cutData.iloc[:,:]
+    #print(Y)
+    
+    return 
+
+
 
 def calculatePrior(df, Y):
     classes = sorted(list(df[Y].unique()))
@@ -85,14 +94,15 @@ def naiveBayesGuassian(df, X, Y):
 
     return np.array(YPrediction)
 
+
+#Split data into training-set and test-set
 from sklearn.model_selection import train_test_split
-train, test = train_test_split(cleanData(data), test_size=.2, random_state=20)
-xTest = test[:,:-1]
-yTest = test[:,-1]
-yPred = naiveBayesGuassian(cleanData(data), xTest, 4)
+train, test = train_test_split(cleanData(data), test_size=.2, random_state=42)
+
+#yPred = naiveBayesGuassian(cleanData(data), xTest, 4)
 
 from sklearn.metrics import f1_score
 
-print(yPred)
+cleanData(data)
 
 #print("data")
