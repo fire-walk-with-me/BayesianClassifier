@@ -1,12 +1,9 @@
 import numpy as np
-import time as t
 import pandas as pd
 from sklearn.preprocessing import LabelEncoder
 import matplotlib.pyplot as plt
 
 data = pd.read_csv('Data.csv')
-X = []
-Y = []
 
 #process and clean data. Lable columns and classes. 
 def cleanData(data):
@@ -47,12 +44,7 @@ def cleanData(data):
         elif(cutData.iloc[i, 3] == 3): mhList.append(data.iloc[i, 3])
         elif(cutData.iloc[i, 3] == 4): hiList.append(data.iloc[i, 3])
 
-    X = cutData.iloc[:, 3]
-    Y = cutData.iloc[:,:]
-    #print(Y)
-    
-    return 
-
+    return cutData
 
 
 def calculatePrior(df, Y):
@@ -62,47 +54,59 @@ def calculatePrior(df, Y):
         prior.append(len(df[df[Y] == i])/len(df))
     return prior
 
-def calculateLikelihoodGuassian(df, featName, featValue, Y, label):
-    feat = list(df.columns)
-    print(feat)
-    df= df[df[Y] == label]
-    mean = df[featName].mean()
-    std = df[featName].std()
 
-    pXGivenY = (1 / (np.sqrt(2 * np.pi) * std)) * np.exp(-((featValue - mean)**2 / (2 * std **2)))
+def calculateLikelihoodGaussian(df, featName, featValue, Y, label):
+    feat = list(df.columns)
+    df = df[df[Y] == label]
+    print(featName , ": ",df[featName])
+    if(sum(df[featName]) > 0):
+        mean = df[featName].mean()
+        std = df[featName].std()
+    else:
+        mean = 0
+        std = 1
+
+    pXGivenY = (1 / (np.sqrt(2 * np.pi) * std)) * np.exp(-((featValue - mean)**2 / (2 * std**2)))
     return pXGivenY
 
-def naiveBayesGuassian(df, X, Y):
-    features = list(df)
 
+def naiveBayesGaussian(df, X, Y):
+    features = list(df.columns)
+    print("features: " ,features)
     prior = calculatePrior(df, Y)
-
+    print("Prior: " ,prior)
     YPrediction = []
 
     for x in X:
-        lables = sorted(list(df[Y].unique()))
-        likelihood = [1] * len(lables)
-        for j in range(len(lables)):
+        print(x)
+        labels = sorted(list(df[Y].unique()))
+        print("labeles: " ,labels)
+        likelihood = [1] * len(labels)
+        for j in range(len(labels)):
             for i in range(len(features)):
-                likelihood[j] = calculateLikelihoodGuassian(df, features[i], x[i], Y[i], lables[j])
+                likelihood[j] = calculateLikelihoodGaussian(df, features[i], x[i], Y, labels[j])
 
-    postProbability = [1] * len(lables)
-    for j in range(len(lables)):
-        postProbability[j]= likelihood[j] * prior[j]
+            postProbability = [1] * len(labels)
+            for j in range(len(labels)):
+                postProbability[j] = likelihood[j] * prior[j]
 
-    YPrediction.append(np.argmax(postProbability))
+            YPrediction.append(np.argmax(postProbability))
 
     return np.array(YPrediction)
 
 
+df = cleanData(data)
+
 #Split data into training-set and test-set
 from sklearn.model_selection import train_test_split
-train, test = train_test_split(cleanData(data), test_size=.2, random_state=42)
+train, test = train_test_split(df, test_size=.2, random_state=42)
 
-#yPred = naiveBayesGuassian(cleanData(data), xTest, 4)
+yTest = test.iloc[:, 3].values
+xTest = test.drop(columns=["salary_in_usd"])
+xtest = test.iloc[:,:].values #change test to xTest
+yPred = naiveBayesGaussian(train, xTest, "salary_in_usd")
 
 from sklearn.metrics import f1_score
-
-cleanData(data)
+#print(f1_score(yTest,yPred))
 
 #print("data")
