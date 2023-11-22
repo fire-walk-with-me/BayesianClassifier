@@ -1,3 +1,4 @@
+import time as t
 import numpy as np
 import pandas as pd
 from sklearn.preprocessing import LabelEncoder
@@ -58,7 +59,7 @@ def calculatePrior(df, Y):
 def calculateLikelihoodGaussian(df, featName, featValue, Y, label):
     feat = list(df.columns)
     df = df[df[Y] == label]
-    print(featName , ": ",df[featName])
+    #print(featName , ": ",df[featName])
     if(sum(df[featName]) > 0):
         mean = df[featName].mean()
         std = df[featName].std()
@@ -71,16 +72,18 @@ def calculateLikelihoodGaussian(df, featName, featValue, Y, label):
 
 
 def naiveBayesGaussian(df, X, Y):
-    features = list(df.columns)
+    features = list(X.columns)
     print("features: " ,features)
     prior = calculatePrior(df, Y)
-    print("Prior: " ,prior)
+    #print("Prior: " ,prior)
     YPrediction = []
 
-    for x in X:
-        print(x)
+    print("training on data...")
+
+    for x in X.values:
+        
         labels = sorted(list(df[Y].unique()))
-        print("labeles: " ,labels)
+        
         likelihood = [1] * len(labels)
         for j in range(len(labels)):
             for i in range(len(features)):
@@ -94,19 +97,27 @@ def naiveBayesGaussian(df, X, Y):
 
     return np.array(YPrediction)
 
-
 df = cleanData(data)
 
 #Split data into training-set and test-set
 from sklearn.model_selection import train_test_split
-train, test = train_test_split(df, test_size=.2, random_state=42)
+train, test = train_test_split(df, test_size=.2, random_state=50)
 
 yTest = test.iloc[:, 3].values
+#yTest = np.array(yTest)
 xTest = test.drop(columns=["salary_in_usd"])
-xtest = test.iloc[:,:].values #change test to xTest
+xtest = xTest.iloc[:,:].values
 yPred = naiveBayesGaussian(train, xTest, "salary_in_usd")
+print(len(yPred))
 
-from sklearn.metrics import f1_score
+#from sklearn.metrics import f1_score
+accuracy = 0
+
+for i,j in zip(yPred,yTest):
+    #print(i," ," ,j)
+    if(i == j):
+        accuracy += 1
+
+print(len(yPred), ", " , len(yTest))
+print("Accuracy = ",accuracy/len(yTest) ,",",  accuracy, " of ", len(yTest))
 #print(f1_score(yTest,yPred))
-
-#print("data")
