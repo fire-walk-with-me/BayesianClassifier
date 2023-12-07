@@ -31,7 +31,7 @@ def cleanData(data):
     #year = 0, experiance level = 1, job title = 2, country = 4, company size = 5
     #salary = 3
 
-    X = cutData.iloc[:, 4]
+    X = cutData.iloc[:, 0]
     Y = cutData.iloc[:, 3]
     
     df = []
@@ -67,7 +67,7 @@ def k_means(df, k):
     return labels, centroids
 
 # Set the number of clusters (k)
-k = 3
+k = 5
 
 # Apply k-means algorithm
 labels, centroids = k_means(cleanData(data), k)
@@ -79,6 +79,6 @@ data = cleanData(data)
 
 # Visualize the results
 plt.scatter(data[:,0], data[:,1], c=labels, cmap='viridis', alpha=0.7, edgecolors='k')
-plt.scatter(centroids[:, 0], centroids[:, 1], c='red', marker='X', s=200, label='Centroids')
+plt.scatter(centroids[:, 0], centroids[:, 1], c='red', marker='X', s=100, label='Centroids')
 plt.legend()
 plt.show()
