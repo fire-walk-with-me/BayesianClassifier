@@ -13,7 +13,7 @@ def cleanData(data):
     cutData = data.copy()
     #cutData["salary_in_usd"] = pd.cut(cutData["salary_in_usd"].values, bins= 5, labels=[0, 1, 2, 3, 4])
     
-    #classes
+    #features
     year = LabelEncoder()
     exp_lvl = LabelEncoder()
     job_title = LabelEncoder()
@@ -22,16 +22,22 @@ def cleanData(data):
 
     #cutData = cutData.iloc[:,:].values
 
+    experianceMapping = {"EN": 0, "EX": 1, "MI": 2, "SE": 3}
+    cutData["experience_level"] = cutData["experience_level"].map(experianceMapping)
+
+    sizeMapping = {"S": 0, "M": 1, "L": 2}
+    cutData["company_size"] = cutData["company_size"].map(sizeMapping)
+
     #fit encoded variables to specific columns
-    cutData.iloc[:, 0] = year.fit_transform(cutData.iloc[:,0])
-    cutData.iloc[:, 1] = exp_lvl.fit_transform(cutData.iloc[:, 1])
+    #cutData.iloc[:, 0] = year.fit_transform(cutData.iloc[:,0])
+    #cutData.iloc[:, 1] = exp_lvl.fit_transform(cutData.iloc[:, 1])
     cutData.iloc[:, 2] = job_title.fit_transform(cutData.iloc[:, 2])
     cutData.iloc[:, 4] = country.fit_transform(cutData.iloc[:, 4])
-    cutData.iloc[:, 5] = comp_size.fit_transform(cutData.iloc[:, 5])
+    #cutData.iloc[:, 5] = comp_size.fit_transform(cutData.iloc[:, 5])
     #year = 0, experiance level = 1, job title = 2, country = 4, company size = 5
     #salary = 3
 
-    X = cutData.iloc[:, 0]
+    X = cutData.iloc[:, 4]
     Y = cutData.iloc[:, 3]
     
     df = []
@@ -67,7 +73,7 @@ def k_means(df, k):
     return labels, centroids
 
 # Set the number of clusters (k)
-k = 5
+k = 3
 
 # Apply k-means algorithm
 labels, centroids = k_means(cleanData(data), k)
